@@ -25,11 +25,12 @@ from TTS.tts.layers.vits.discriminator import VitsDiscriminator
 from TTS.tts.layers.vits.networks import PosteriorEncoder, ResidualCouplingBlocks, TextEncoder
 from TTS.tts.layers.vits.stochastic_duration_predictor import StochasticDurationPredictor
 from TTS.tts.models.base_tts import BaseTTS
+from TTS.tts.utils.fairseq import rehash_fairseq_vits_checkpoint
 from TTS.tts.utils.helpers import generate_path, maximum_path, rand_segments, segment, sequence_mask
 from TTS.tts.utils.languages import LanguageManager
 from TTS.tts.utils.speakers import SpeakerManager
 from TTS.tts.utils.synthesis import synthesis
-from TTS.tts.utils.text.characters import BaseCharacters, _characters, _pad, _phonemes, _punctuations
+from TTS.tts.utils.text.characters import BaseCharacters, BaseVocabulary, _characters, _pad, _phonemes, _punctuations
 from TTS.tts.utils.text.tokenizer import TTSTokenizer
 from TTS.tts.utils.visual import plot_alignment
 from TTS.utils.io import load_fsspec
@@ -130,6 +131,7 @@ def wav_to_spec(y, n_fft, hop_length, win_length, center=False):
         pad_mode="reflect",
         normalized=False,
         onesided=True,
+        return_complex=False,
     )
 
     spec = torch.sqrt(spec.pow(2).sum(-1) + 1e-6)
@@ -148,7 +150,7 @@ def spec_to_mel(spec, n_fft, num_mels, sample_rate, fmin, fmax):
     dtype_device = str(spec.dtype) + "_" + str(spec.device)
     fmax_dtype_device = str(fmax) + "_" + dtype_device
     if fmax_dtype_device not in mel_basis:
-        mel = librosa_mel_fn(sample_rate, n_fft, num_mels, fmin, fmax)
+        mel = librosa_mel_fn(sr=sample_rate, n_fft=n_fft, n_mels=num_mels, fmin=fmin, fmax=fmax)
         mel_basis[fmax_dtype_device] = torch.from_numpy(mel).to(dtype=spec.dtype, device=spec.device)
     mel = torch.matmul(mel_basis[fmax_dtype_device], spec)
     mel = amp_to_db(mel)
@@ -175,7 +177,7 @@ def wav_to_mel(y, n_fft, num_mels, sample_rate, hop_length, win_length, fmin, fm
     fmax_dtype_device = str(fmax) + "_" + dtype_device
     wnsize_dtype_device = str(win_length) + "_" + dtype_device
     if fmax_dtype_device not in mel_basis:
-        mel = librosa_mel_fn(sample_rate, n_fft, num_mels, fmin, fmax)
+        mel = librosa_mel_fn(sr=sample_rate, n_fft=n_fft, n_mels=num_mels, fmin=fmin, fmax=fmax)
         mel_basis[fmax_dtype_device] = torch.from_numpy(mel).to(dtype=y.dtype, device=y.device)
     if wnsize_dtype_device not in hann_window:
         hann_window[wnsize_dtype_device] = torch.hann_window(win_length).to(dtype=y.dtype, device=y.device)
@@ -197,6 +199,7 @@ def wav_to_mel(y, n_fft, num_mels, sample_rate, hop_length, win_length, fmin, fm
         pad_mode="reflect",
         normalized=False,
         onesided=True,
+        return_complex=False,
     )
 
     spec = torch.sqrt(spec.pow(2).sum(-1) + 1e-6)
@@ -633,7 +636,6 @@ class Vits(BaseTTS):
         speaker_manager: SpeakerManager = None,
         language_manager: LanguageManager = None,
     ):
-
         super().__init__(config, ap, tokenizer, speaker_manager, language_manager)
 
         self.init_multispeaker(config)
@@ -1280,7 +1282,6 @@ class Vits(BaseTTS):
 
             # compute melspec segment
             with autocast(enabled=False):
-
                 if self.args.encoder_sample_rate:
                     spec_segment_size = self.spec_segment_size * int(self.interpolate_factor)
                 else:
@@ -1472,7 +1473,6 @@ class Vits(BaseTTS):
 
         if speaker_ids is not None:
             speaker_ids = torch.LongTensor(speaker_ids)
-            batch["speaker_ids"] = speaker_ids
 
         # get d_vectors from audio file names
         if self.speaker_manager is not None and self.speaker_manager.embeddings and self.args.use_d_vector_file:
@@ -1630,13 +1630,23 @@ class Vits(BaseTTS):
                     pin_memory=False,
                 )
             else:
-                loader = DataLoader(
-                    dataset,
-                    batch_sampler=sampler,
-                    collate_fn=dataset.collate_fn,
-                    num_workers=config.num_eval_loader_workers if is_eval else config.num_loader_workers,
-                    pin_memory=False,
-                )
+                if num_gpus > 1:
+                    loader = DataLoader(
+                        dataset,
+                        sampler=sampler,
+                        batch_size=config.eval_batch_size if is_eval else config.batch_size,
+                        collate_fn=dataset.collate_fn,
+                        num_workers=config.num_eval_loader_workers if is_eval else config.num_loader_workers,
+                        pin_memory=False,
+                    )
+                else:
+                    loader = DataLoader(
+                        dataset,
+                        batch_sampler=sampler,
+                        collate_fn=dataset.collate_fn,
+                        num_workers=config.num_eval_loader_workers if is_eval else config.num_loader_workers,
+                        pin_memory=False,
+                    )
         return loader
 
     def get_optimizer(self) -> List:
@@ -1714,6 +1724,50 @@ class Vits(BaseTTS):
             self.eval()
             assert not self.training
 
+    def load_fairseq_checkpoint(
+        self, config, checkpoint_dir, eval=False, strict=True
+    ):  # pylint: disable=unused-argument, redefined-builtin
+        """Load VITS checkpoints released by fairseq here: https://github.com/facebookresearch/fairseq/tree/main/examples/mms
+        Performs some changes for compatibility.
+
+        Args:
+            config (Coqpit): 🐸TTS model config.
+            checkpoint_dir (str): Path to the checkpoint directory.
+            eval (bool, optional): Set to True for evaluation. Defaults to False.
+        """
+        import json
+
+        from TTS.tts.utils.text.cleaners import basic_cleaners
+
+        self.disc = None
+        # set paths
+        config_file = os.path.join(checkpoint_dir, "config.json")
+        checkpoint_file = os.path.join(checkpoint_dir, "G_100000.pth")
+        vocab_file = os.path.join(checkpoint_dir, "vocab.txt")
+        # set config params
+        with open(config_file, "r", encoding="utf-8") as file:
+            # Load the JSON data as a dictionary
+            config_org = json.load(file)
+        self.config.audio.sample_rate = config_org["data"]["sampling_rate"]
+        # self.config.add_blank = config['add_blank']
+        # set tokenizer
+        vocab = FairseqVocab(vocab_file)
+        self.text_encoder.emb = nn.Embedding(vocab.num_chars, config.model_args.hidden_channels)
+        self.tokenizer = TTSTokenizer(
+            use_phonemes=False,
+            text_cleaner=basic_cleaners,
+            characters=vocab,
+            phonemizer=None,
+            add_blank=config_org["data"]["add_blank"],
+            use_eos_bos=False,
+        )
+        # load fairseq checkpoint
+        new_chk = rehash_fairseq_vits_checkpoint(checkpoint_file)
+        self.load_state_dict(new_chk, strict=strict)
+        if eval:
+            self.eval()
+            assert not self.training
+
     @staticmethod
     def init_from_config(config: "VitsConfig", samples: Union[List[List], List[Dict]] = None, verbose=True):
         """Initiate model from config
@@ -1748,6 +1802,128 @@ class Vits(BaseTTS):
                 config.model_args.speaker_encoder_model_path, config.model_args.speaker_encoder_config_path
             )
         return Vits(new_config, ap, tokenizer, speaker_manager, language_manager)
+
+    def export_onnx(self, output_path: str = "coqui_vits.onnx", verbose: bool = True):
+        """Export model to ONNX format for inference
+
+        Args:
+            output_path (str): Path to save the exported model.
+            verbose (bool): Print verbose information. Defaults to True.
+        """
+
+        # rollback values
+        _forward = self.forward
+        disc = None
+        if hasattr(self, "disc"):
+            disc = self.disc
+        training = self.training
+
+        # set export mode
+        self.disc = None
+        self.eval()
+
+        def onnx_inference(text, text_lengths, scales, sid=None, langid=None):
+            noise_scale = scales[0]
+            length_scale = scales[1]
+            noise_scale_dp = scales[2]
+            self.noise_scale = noise_scale
+            self.length_scale = length_scale
+            self.noise_scale_dp = noise_scale_dp
+            return self.inference(
+                text,
+                aux_input={
+                    "x_lengths": text_lengths,
+                    "d_vectors": None,
+                    "speaker_ids": sid,
+                    "language_ids": langid,
+                    "durations": None,
+                },
+            )["model_outputs"]
+
+        self.forward = onnx_inference
+
+        # set dummy inputs
+        dummy_input_length = 100
+        sequences = torch.randint(low=0, high=2, size=(1, dummy_input_length), dtype=torch.long)
+        sequence_lengths = torch.LongTensor([sequences.size(1)])
+        scales = torch.FloatTensor([self.inference_noise_scale, self.length_scale, self.inference_noise_scale_dp])
+        dummy_input = (sequences, sequence_lengths, scales)
+        input_names = ["input", "input_lengths", "scales"]
+
+        if self.num_speakers > 0:
+            speaker_id = torch.LongTensor([0])
+            dummy_input += (speaker_id,)
+            input_names.append("sid")
+
+        if hasattr(self, "num_languages") and self.num_languages > 0 and self.embedded_language_dim > 0:
+            language_id = torch.LongTensor([0])
+            dummy_input += (language_id,)
+            input_names.append("langid")
+
+        # export to ONNX
+        torch.onnx.export(
+            model=self,
+            args=dummy_input,
+            opset_version=15,
+            f=output_path,
+            verbose=verbose,
+            input_names=input_names,
+            output_names=["output"],
+            dynamic_axes={
+                "input": {0: "batch_size", 1: "phonemes"},
+                "input_lengths": {0: "batch_size"},
+                "output": {0: "batch_size", 1: "time1", 2: "time2"},
+            },
+        )
+
+        # rollback
+        self.forward = _forward
+        if training:
+            self.train()
+        if not disc is None:
+            self.disc = disc
+
+    def load_onnx(self, model_path: str, cuda=False):
+        import onnxruntime as ort
+
+        providers = [
+            "CPUExecutionProvider"
+            if cuda is False
+            else ("CUDAExecutionProvider", {"cudnn_conv_algo_search": "DEFAULT"})
+        ]
+        sess_options = ort.SessionOptions()
+        self.onnx_sess = ort.InferenceSession(
+            model_path,
+            sess_options=sess_options,
+            providers=providers,
+        )
+
+    def inference_onnx(self, x, x_lengths=None, speaker_id=None, language_id=None):
+        """ONNX inference"""
+
+        if isinstance(x, torch.Tensor):
+            x = x.cpu().numpy()
+
+        if x_lengths is None:
+            x_lengths = np.array([x.shape[1]], dtype=np.int64)
+
+        if isinstance(x_lengths, torch.Tensor):
+            x_lengths = x_lengths.cpu().numpy()
+        scales = np.array(
+            [self.inference_noise_scale, self.length_scale, self.inference_noise_scale_dp],
+            dtype=np.float32,
+        )
+        input_params = {"input": x, "input_lengths": x_lengths, "scales": scales}
+        if not speaker_id is None:
+            input_params["sid"] = torch.tensor([speaker_id]).cpu().numpy()
+        if not language_id is None:
+            input_params["langid"] = torch.tensor([language_id]).cpu().numpy()
+
+        audio = self.onnx_sess.run(
+            ["output"],
+            input_params,
+        )
+        return audio[0][0]
 
 
 ##################################
@@ -1801,3 +1977,23 @@ class VitsCharacters(BaseCharacters):
             is_unique=False,
             is_sorted=True,
         )
+
+
+class FairseqVocab(BaseVocabulary):
+    def __init__(self, vocab: str):
+        super(FairseqVocab).__init__()
+        self.vocab = vocab
+
+    @property
+    def vocab(self):
+        """Return the vocabulary dictionary."""
+        return self._vocab
+
+    @vocab.setter
+    def vocab(self, vocab_file):
+        with open(vocab_file, encoding="utf-8") as f:
+            self._vocab = [x.replace("\n", "") for x in f.readlines()]
+        self.blank = self._vocab[0]
+        self.pad = " "
+        self._char_to_id = {s: i for i, s in enumerate(self._vocab)}  # pylint: disable=unnecessary-comprehension
+        self._id_to_char = {i: s for i, s in enumerate(self._vocab)}  # pylint: disable=unnecessary-comprehension

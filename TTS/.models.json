@@ -1,20 +1,66 @@
 {
     "tts_models": {
-        "multilingual":{
-            "multi-dataset":{
-                "your_tts":{
+        "multilingual": {
+            "multi-dataset": {
+                "xtts_v2": {
+                    "description": "XTTS-v2.0.3 by Coqui with 17 languages.",
+                    "hf_url": [
+                        "https://coqui.gateway.scarf.sh/hf-coqui/XTTS-v2/main/model.pth",
+                        "https://coqui.gateway.scarf.sh/hf-coqui/XTTS-v2/main/config.json",
+                        "https://coqui.gateway.scarf.sh/hf-coqui/XTTS-v2/main/vocab.json",
+                        "https://coqui.gateway.scarf.sh/hf-coqui/XTTS-v2/main/hash.md5",
+                        "https://coqui.gateway.scarf.sh/hf-coqui/XTTS-v2/main/speakers_xtts.pth"
+                    ],
+                    "model_hash": "10f92b55c512af7a8d39d650547a15a7",
+                    "default_vocoder": null,
+                    "commit": "480a6cdf7",
+                    "license": "CPML",
+                    "contact": "info@coqui.ai",
+                    "tos_required": true
+                },
+                "xtts_v1.1": {
+                    "description": "XTTS-v1.1 by Coqui with 14 languages, cross-language voice cloning and reference leak fixed.",
+                    "hf_url": [
+                        "https://coqui.gateway.scarf.sh/hf-coqui/XTTS-v1/v1.1.2/model.pth",
+                        "https://coqui.gateway.scarf.sh/hf-coqui/XTTS-v1/v1.1.2/config.json",
+                        "https://coqui.gateway.scarf.sh/hf-coqui/XTTS-v1/v1.1.2/vocab.json",
+                        "https://coqui.gateway.scarf.sh/hf-coqui/XTTS-v1/v1.1.2/hash.md5"
+                    ],
+                    "model_hash": "7c62beaf58d39b729de287330dc254e7b515677416839b649a50e7cf74c3df59",
+                    "default_vocoder": null,
+                    "commit": "82910a63",
+                    "license": "CPML",
+                    "contact": "info@coqui.ai",
+                    "tos_required": true
+                },
+                "your_tts": {
                     "description": "Your TTS model accompanying the paper https://arxiv.org/abs/2112.02418",
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.10.1_models/tts_models--multilingual--multi-dataset--your_tts.zip",
                     "default_vocoder": null,
                     "commit": "e9a1953e",
                     "license": "CC BY-NC-ND 4.0",
                     "contact": "egolge@coqui.ai"
+                },
+                "bark": {
+                    "description": "🐶 Bark TTS model released by suno-ai. You can find the original implementation in https://github.com/suno-ai/bark.",
+                    "hf_url": [
+                        "https://coqui.gateway.scarf.sh/hf/bark/coarse_2.pt",
+                        "https://coqui.gateway.scarf.sh/hf/bark/fine_2.pt",
+                        "https://coqui.gateway.scarf.sh/hf/text_2.pt",
+                        "https://coqui.gateway.scarf.sh/hf/bark/config.json",
+                        "https://coqui.gateway.scarf.sh/hf/bark/hubert.pt",
+                        "https://coqui.gateway.scarf.sh/hf/bark/tokenizer.pth"
+                    ],
+                    "default_vocoder": null,
+                    "commit": "e9a1953e",
+                    "license": "MIT",
+                    "contact": "https://www.suno.ai/"
                 }
             }
         },
         "bg": {
             "cv": {
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.8.0_models/tts_models--bg--cv--vits.zip",
                     "default_vocoder": null,
                     "commit": null,
@@ -25,7 +71,7 @@
         },
         "cs": {
             "cv": {
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.8.0_models/tts_models--cs--cv--vits.zip",
                     "default_vocoder": null,
                     "commit": null,
@@ -36,7 +82,7 @@
         },
         "da": {
             "cv": {
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.8.0_models/tts_models--da--cv--vits.zip",
                     "default_vocoder": null,
                     "commit": null,
@@ -47,7 +93,7 @@
         },
         "et": {
             "cv": {
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.8.0_models/tts_models--et--cv--vits.zip",
                     "default_vocoder": null,
                     "commit": null,
@@ -58,7 +104,7 @@
         },
         "ga": {
             "cv": {
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.8.0_models/tts_models--ga--cv--vits.zip",
                     "default_vocoder": null,
                     "commit": null,
@@ -159,6 +205,15 @@
                     "author": "Eren Gölge @erogol",
                     "license": "apache 2.0",
                     "contact": "egolge@coqui.ai"
+                },
+                "neural_hmm": {
+                    "description": "Neural HMM model trained on LJSpeech",
+                    "github_rls_url": "https://coqui.gateway.scarf.sh/v0.11.0_models/tts_models--en--ljspeech--neural_hmm.zip",
+                    "default_vocoder": "vocoder_models/en/ljspeech/hifigan_v2",
+                    "commit": "3b1a28f",
+                    "author": "Shivam Metha @shivammehta25",
+                    "license": "apache 2.0",
+                    "contact": "d83ee8fe45e3c0d776d4a865aca21d7c2ac324c4"
                 }
             },
             "vctk": {
@@ -171,7 +226,7 @@
                     "license": "apache 2.0",
                     "contact": "egolge@coqui.ai"
                 },
-                "fast_pitch":{
+                "fast_pitch": {
                     "description": "FastPitch model trained on VCTK dataseset.",
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.6.1_models/tts_models--en--vctk--fast_pitch.zip",
                     "default_vocoder": null,
@@ -211,6 +266,36 @@
                     "license": "apache 2.0",
                     "contact": "adamfroghyar@gmail.com"
                 }
+            },
+            "multi-dataset": {
+                "tortoise-v2": {
+                    "description": "Tortoise tts model https://github.com/neonbjb/tortoise-tts",
+                    "github_rls_url": [
+                        "https://coqui.gateway.scarf.sh/v0.14.1_models/autoregressive.pth",
+                        "https://coqui.gateway.scarf.sh/v0.14.1_models/clvp2.pth",
+                        "https://coqui.gateway.scarf.sh/v0.14.1_models/cvvp.pth",
+                        "https://coqui.gateway.scarf.sh/v0.14.1_models/diffusion_decoder.pth",
+                        "https://coqui.gateway.scarf.sh/v0.14.1_models/rlg_auto.pth",
+                        "https://coqui.gateway.scarf.sh/v0.14.1_models/rlg_diffuser.pth",
+                        "https://coqui.gateway.scarf.sh/v0.14.1_models/vocoder.pth",
+                        "https://coqui.gateway.scarf.sh/v0.14.1_models/mel_norms.pth",
+                        "https://coqui.gateway.scarf.sh/v0.14.1_models/config.json"
+                    ],
+                    "commit": "c1875f6",
+                    "default_vocoder": null,
+                    "author": "@neonbjb - James Betker, @manmay-nakhashi Manmay Nakhashi",
+                    "license": "apache 2.0"
+                }
+            },
+            "jenny": {
+                "jenny": {
+                    "description": "VITS model trained with Jenny(Dioco) dataset. Named as Jenny as demanded by the license. Original URL for the model https://www.kaggle.com/datasets/noml4u/tts-models--en--jenny-dioco--vits",
+                    "github_rls_url": "https://coqui.gateway.scarf.sh/v0.14.0_models/tts_models--en--jenny--jenny.zip",
+                    "default_vocoder": null,
+                    "commit": "ba40a1c",
+                    "license": "custom - see https://github.com/dioco-group/jenny-tts-dataset#important",
+                    "author": "@noml4u"
+                }
             }
         },
         "es": {
@@ -224,8 +309,8 @@
                     "contact": "egolge@coqui.com"
                 }
             },
-            "css10":{
-                "vits":{
+            "css10": {
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.8.0_models/tts_models--es--css10--vits.zip",
                     "default_vocoder": null,
                     "commit": null,
@@ -245,8 +330,8 @@
                     "contact": "egolge@coqui.com"
                 }
             },
-            "css10":{
-                "vits":{
+            "css10": {
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.8.0_models/tts_models--fr--css10--vits.zip",
                     "default_vocoder": null,
                     "commit": null,
@@ -255,17 +340,17 @@
                 }
             }
         },
-        "uk":{
+        "uk": {
             "mai": {
                 "glow-tts": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.6.1_models/tts_models--uk--mai--glow-tts.zip",
-                    "author":"@robinhad",
+                    "author": "@robinhad",
                     "commit": "bdab788d",
                     "license": "MIT",
                     "contact": "",
                     "default_vocoder": "vocoder_models/uk/mai/multiband-melgan"
                 },
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.8.0_models/tts_models--uk--mai--vits.zip",
                     "default_vocoder": null,
                     "commit": null,
@@ -296,8 +381,8 @@
                     "commit": "540d811"
                 }
             },
-            "css10":{
-                "vits":{
+            "css10": {
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.8.0_models/tts_models--nl--css10--vits.zip",
                     "default_vocoder": null,
                     "commit": null,
@@ -332,7 +417,7 @@
                 }
             },
             "css10": {
-                "vits-neon":{
+                "vits-neon": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.8.0_models/tts_models--de--css10--vits.zip",
                     "default_vocoder": null,
                     "author": "@NeonGeckoCom",
@@ -353,9 +438,9 @@
                 }
             }
         },
-        "tr":{
+        "tr": {
             "common-voice": {
-                "glow-tts":{
+                "glow-tts": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.6.1_models/tts_models--tr--common-voice--glow-tts.zip",
                     "default_vocoder": "vocoder_models/tr/common-voice/hifigan",
                     "license": "MIT",
@@ -367,7 +452,7 @@
         },
         "it": {
             "mai_female": {
-                "glow-tts":{
+                "glow-tts": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.6.1_models/tts_models--it--mai_female--glow-tts.zip",
                     "default_vocoder": null,
                     "description": "GlowTTS model as explained on https://github.com/coqui-ai/TTS/issues/1148.",
@@ -375,7 +460,7 @@
                     "license": "apache 2.0",
                     "commit": null
                 },
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.6.1_models/tts_models--it--mai_female--vits.zip",
                     "default_vocoder": null,
                     "description": "GlowTTS model as explained on https://github.com/coqui-ai/TTS/issues/1148.",
@@ -385,7 +470,7 @@
                 }
             },
             "mai_male": {
-                "glow-tts":{
+                "glow-tts": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.6.1_models/tts_models--it--mai_male--glow-tts.zip",
                     "default_vocoder": null,
                     "description": "GlowTTS model as explained on https://github.com/coqui-ai/TTS/issues/1148.",
@@ -393,7 +478,7 @@
                     "license": "apache 2.0",
                     "commit": null
                 },
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.6.1_models/tts_models--it--mai_male--vits.zip",
                     "default_vocoder": null,
                     "description": "GlowTTS model as explained on https://github.com/coqui-ai/TTS/issues/1148.",
@@ -405,7 +490,7 @@
         },
         "ewe": {
             "openbible": {
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.6.2_models/tts_models--ewe--openbible--vits.zip",
                     "default_vocoder": null,
                     "license": "CC-BY-SA 4.0",
@@ -417,7 +502,7 @@
         },
         "hau": {
             "openbible": {
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.6.2_models/tts_models--hau--openbible--vits.zip",
                     "default_vocoder": null,
                     "license": "CC-BY-SA 4.0",
@@ -429,7 +514,7 @@
         },
         "lin": {
             "openbible": {
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.6.2_models/tts_models--lin--openbible--vits.zip",
                     "default_vocoder": null,
                     "license": "CC-BY-SA 4.0",
@@ -441,7 +526,7 @@
         },
         "tw_akuapem": {
             "openbible": {
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.6.2_models/tts_models--tw_akuapem--openbible--vits.zip",
                     "default_vocoder": null,
                     "license": "CC-BY-SA 4.0",
@@ -453,7 +538,7 @@
         },
         "tw_asante": {
             "openbible": {
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.6.2_models/tts_models--tw_asante--openbible--vits.zip",
                     "default_vocoder": null,
                     "license": "CC-BY-SA 4.0",
@@ -465,7 +550,7 @@
         },
         "yor": {
             "openbible": {
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.6.2_models/tts_models--yor--openbible--vits.zip",
                     "default_vocoder": null,
                     "license": "CC-BY-SA 4.0",
@@ -499,7 +584,7 @@
         },
         "fi": {
             "css10": {
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.8.0_models/tts_models--fi--css10--vits.zip",
                     "default_vocoder": null,
                     "commit": null,
@@ -510,7 +595,7 @@
         },
         "hr": {
             "cv": {
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.8.0_models/tts_models--hr--cv--vits.zip",
                     "default_vocoder": null,
                     "commit": null,
@@ -521,7 +606,7 @@
         },
         "lt": {
             "cv": {
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.8.0_models/tts_models--lt--cv--vits.zip",
                     "default_vocoder": null,
                     "commit": null,
@@ -532,7 +617,7 @@
         },
         "lv": {
             "cv": {
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.8.0_models/tts_models--lv--cv--vits.zip",
                     "default_vocoder": null,
                     "commit": null,
@@ -543,7 +628,7 @@
         },
         "mt": {
             "cv": {
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.8.0_models/tts_models--mt--cv--vits.zip",
                     "default_vocoder": null,
                     "commit": null,
@@ -554,7 +639,7 @@
         },
         "pl": {
             "mai_female": {
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.8.0_models/tts_models--pl--mai_female--vits.zip",
                     "default_vocoder": null,
                     "commit": null,
@@ -565,7 +650,7 @@
         },
         "pt": {
             "cv": {
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.8.0_models/tts_models--pt--cv--vits.zip",
                     "default_vocoder": null,
                     "commit": null,
@@ -576,7 +661,7 @@
         },
         "ro": {
             "cv": {
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.8.0_models/tts_models--ro--cv--vits.zip",
                     "default_vocoder": null,
                     "commit": null,
@@ -587,7 +672,7 @@
         },
         "sk": {
             "cv": {
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.8.0_models/tts_models--sk--cv--vits.zip",
                     "default_vocoder": null,
                     "commit": null,
@@ -598,7 +683,7 @@
         },
         "sl": {
             "cv": {
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.8.0_models/tts_models--sl--cv--vits.zip",
                     "default_vocoder": null,
                     "commit": null,
@@ -609,7 +694,7 @@
         },
         "sv": {
             "cv": {
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.8.0_models/tts_models--sv--cv--vits.zip",
                     "default_vocoder": null,
                     "commit": null,
@@ -620,7 +705,7 @@
         },
         "ca": {
             "custom": {
-                "vits":{
+                "vits": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.10.1_models/tts_models--ca--custom--vits.zip",
                     "default_vocoder": null,
                     "commit": null,
@@ -630,8 +715,8 @@
                 }
             }
         },
-        "fa":{
-            "custom":{
+        "fa": {
+            "custom": {
                 "glow-tts": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.10.1_models/tts_models--fa--custom--glow-tts.zip",
                     "default_vocoder": null,
@@ -639,6 +724,38 @@
                     "description": "persian-tts-female-glow_tts model for text to speech purposes. Single-speaker female voice Trained on persian-tts-dataset-famale. \nThis model has no compatible vocoder thus the output quality is not very good. \nDataset: https://www.kaggle.com/datasets/magnoliasis/persian-tts-dataset-famale.",
                     "author": "@karim23657",
                     "license": "CC-BY-4.0"
+                }
+            }
+        },
+        "bn": {
+            "custom": {
+                "vits-male": {
+                    "github_rls_url": "https://coqui.gateway.scarf.sh/v0.13.3_models/tts_models--bn--custom--vits_male.zip",
+                    "default_vocoder": null,
+                    "commit": null,
+                    "description": "Single speaker Bangla male model. For more information -> https://github.com/mobassir94/comprehensive-bangla-tts",
+                    "author": "@mobassir94",
+                    "license": "Apache 2.0"
+                },
+                "vits-female": {
+                    "github_rls_url": "https://coqui.gateway.scarf.sh/v0.13.3_models/tts_models--bn--custom--vits_female.zip",
+                    "default_vocoder": null,
+                    "commit": null,
+                    "description": "Single speaker Bangla female model. For more information -> https://github.com/mobassir94/comprehensive-bangla-tts",
+                    "author": "@mobassir94",
+                    "license": "Apache 2.0"
+                }
+            }
+        },
+        "be": {
+            "common-voice": {
+                "glow-tts":{
+                    "description": "Belarusian GlowTTS model created by @alex73 (Github).",
+                    "github_rls_url":"https://coqui.gateway.scarf.sh/v0.16.6/tts_models--be--common-voice--glow-tts.zip",
+                    "default_vocoder": "vocoder_models/be/common-voice/hifigan",
+                    "commit": "c0aabb85",
+                    "license": "CC-BY-SA 4.0",
+                    "contact": "alex73mail@gmail.com"
                 }
             }
         }
@@ -775,19 +892,43 @@
             "mai": {
                 "multiband-melgan": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.6.1_models/vocoder_models--uk--mai--multiband-melgan.zip",
-                    "author":"@robinhad",
+                    "author": "@robinhad",
                     "commit": "bdab788d",
                     "license": "MIT",
                     "contact": ""
                 }
             }
         },
-        "tr":{
+        "tr": {
             "common-voice": {
-                "hifigan":{
+                "hifigan": {
                     "github_rls_url": "https://coqui.gateway.scarf.sh/v0.6.1_models/vocoder_models--tr--common-voice--hifigan.zip",
                     "description": "HifiGAN model using an unknown speaker from the Common-Voice dataset.",
                     "author": "Fatih Akademi",
+                    "license": "MIT",
+                    "commit": null
+                }
+            }
+        },
+        "be": {
+            "common-voice": {
+                "hifigan": {
+                    "github_rls_url": "https://coqui.gateway.scarf.sh/v0.16.6/vocoder_models--be--common-voice--hifigan.zip",
+                    "description": "Belarusian HiFiGAN model created by @alex73 (Github).",
+                    "author": "@alex73",
+                    "license": "CC-BY-SA 4.0",
+                    "commit": "c0aabb85"
+                }
+            }
+        }
+    },
+    "voice_conversion_models": {
+        "multilingual": {
+            "vctk": {
+                "freevc24": {
+                    "github_rls_url": "https://coqui.gateway.scarf.sh/v0.13.0_models/voice_conversion_models--multilingual--vctk--freevc24.zip",
+                    "description": "FreeVC model trained on VCTK dataset from https://github.com/OlaWod/FreeVC",
+                    "author": "Jing-Yi Li @OlaWod",
                     "license": "MIT",
                     "commit": null
                 }

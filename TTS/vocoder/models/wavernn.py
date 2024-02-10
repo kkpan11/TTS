@@ -13,6 +13,7 @@ from torch.utils.data.distributed import DistributedSampler
 
 from TTS.tts.utils.visual import plot_spectrogram
 from TTS.utils.audio import AudioProcessor
+from TTS.utils.audio.numpy_transforms import mulaw_decode
 from TTS.utils.io import load_fsspec
 from TTS.vocoder.datasets.wavernn_dataset import WaveRNNDataset
 from TTS.vocoder.layers.losses import WaveRNNLoss
@@ -312,7 +313,6 @@ class Wavernn(BaseVocoder):
         return self.fc3(x)
 
     def inference(self, mels, batched=None, target=None, overlap=None):
-
         self.eval()
         output = []
         start = time.time()
@@ -346,7 +346,6 @@ class Wavernn(BaseVocoder):
                 aux_split = [aux[:, :, d * i : d * (i + 1)] for i in range(4)]
 
             for i in range(seq_len):
-
                 m_t = mels[:, i, :]
 
                 if self.args.use_aux_net:
@@ -401,7 +400,7 @@ class Wavernn(BaseVocoder):
             output = output[0]
 
         if self.args.mulaw and isinstance(self.args.mode, int):
-            output = AudioProcessor.mulaw_decode(output, self.args.mode)
+            output = mulaw_decode(wav=output, mulaw_qc=self.args.mode)
 
         # Fade-out at the end to avoid signal cutting out suddenly
         fade_out = np.linspace(1, 0, 20 * self.config.audio.hop_length)
